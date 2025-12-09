@@ -1,0 +1,6 @@
+# Site settings
+title: My Blog
+description: A modern academic blog built with Jekyll and GitHub Pages
+
+# Build settings
+markdown: kramdown
