@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started with Transformers.js</title>
+    <link rel="stylesheet" href="/styles.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+    
+</head>
+
+<body>
+    <nav class="site-nav">
+        <a href="/" class="site-name">Rasmus Aagaard</a>
+        <div class="nav-links">
+            <a href="/phd/status/">PhD</a>
+            <a href="/blog/">Blog</a>
+            <!--<a href="/favorites/">Favorites</a>-->
+        </div>
+    </nav>
+    <main>
+        <article>
+            <h1>Getting Started with Transformers.js</h1>
+<p>Integrating machine learning into applications often involves creating APIs, models on servers, and complex deployment pipelines. But what if you could run AI models directly in your users' browsers? That's where Transformers.js comes in - bringing the power of Hugging Face models to JavaScript with minimal setup.</p>
+<p>I recently appeared on <a href="https://verbospodcast.dk/">Verbos Podcast</a> as a guest where we talked about serving machine learning models locally in the browser. During the episode the host, <a href="https://www.linkedin.com/in/kasper-juunge">Kasper Junge</a>, asked something along the lines of &quot;So, how do you get started? How and where do you actually run something like this?&quot;</p>
+<p>In this post, I'll try to boil down the few steps that are needed to getting started with Transformers.js. I'll keep the example to a barebones implementation to avoid unnecessary complexity. That of course limits the capabilities of the demo but try to imagine what is possible with this technology! The goal is to make it easier for anyone with a Python background to try this out for themselves.</p>
+<p>Let's start from the absolute basics: <code>index.html</code>.</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;p&gt;Hello, world!&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>You can open <code>index.html</code> in a browser and you should see &quot;Hello, world!&quot;.</p>
+<p>What if I told you that you could add less than 20 lines of code to that <code>index.html</code> and have a working LLM to generate text? Here’s what that might look like:</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+	&lt;title&gt;Document&lt;/title&gt;
+	&lt;script type=&quot;module&quot;&gt;
+		import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1/dist/transformers.min.js';
+		const generator = await pipeline('text-generation', 'Xenova/distilgpt2');
+		const inputText = document.getElementById('inputText');
+		const generateButton = document.getElementById('generateButton');
+		generateButton.addEventListener('click', async () =&gt; {
+		const text = inputText.value;
+		const output = await generator(text);
+		const outputDiv = document.getElementById('output');
+		outputDiv.innerHTML = `&lt;p&gt;${output[0].generated_text}&lt;/p&gt;`;
+		});
+	&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;h1&gt;Text Generation Example&lt;/h1&gt;
+	&lt;p&gt;Check the generated text below:&lt;/p&gt;
+	&lt;input type=&quot;text&quot; id=&quot;inputText&quot; placeholder=&quot;Type your text here...&quot; /&gt;
+	&lt;button id=&quot;generateButton&quot;&gt;Generate Text&lt;/button&gt;
+	&lt;div id=&quot;output&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>If that looks a little daunting then don't worry. Let's break down what's happening here, especially if you use Python and the Hugging Face Transformers library.</p>
+<p>Keep in mind that it is &quot;just&quot; a basic text completion model (quite limited by today's standards) and is not trained to follow instructions as you would expect from ChatGPT etc. But let's try to look past the model's capabilities. Think about all the opportunities that come with making AI/ML models this accessible.</p>
+<h2>If You Already Use Hugging Face in Python</h2>
+<p>If you’ve worked with Hugging Face Transformers in Python, the API should look familiar. You use a <code>pipeline</code> for common tasks like text generation, text classification, or question answering. In Python, it might look like this:</p>
+<pre><code class="language-python">from transformers import pipeline
+
+generator = pipeline('text-generation', model='gpt2')
+generator(&quot;Hello, world!&quot;)
+</code></pre>
+<p>In JavaScript, using Transformers.js, it’s almost the same idea:</p>
+<pre><code class="language-javascript">import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1/dist/transformers.min.js';
+const generator = await pipeline('text-generation', 'Xenova/distilgpt2');
+</code></pre>
+<p>The big difference is that this runs right in your browser. Everything is client-side. No backend server or API key is needed. Your data never leaves your device.</p>
+<h2>Step by Step Breakdown</h2>
+<h3>1. Importing the Pipeline</h3>
+<pre><code class="language-javascript">import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1/dist/transformers.min.js';
+</code></pre>
+<p>This line loads the Transformers.js pipeline from a CDN. No installation or setup. Just include it in your page.</p>
+<h3>2. Loading the Model</h3>
+<pre><code class="language-javascript">const generator = await pipeline('text-generation', 'Xenova/distilgpt2');
+</code></pre>
+<p>Here, <code>'text-generation'</code> tells Transformers.js what task you want to perform, and <code>'Xenova/distilgpt2'</code> is the model you want to use. If you’ve loaded a model in Python, this should make sense right away.</p>
+<h3>3. Connecting to the Page</h3>
+<pre><code class="language-javascript">const inputText = document.getElementById('inputText');
+const generateButton = document.getElementById('generateButton');
+</code></pre>
+<p>This just grabs the input box and button from the HTML.</p>
+<h3>4. Adding the Click Handler</h3>
+<pre><code class="language-javascript">generateButton.addEventListener('click', async () =&gt; {
+	const text = inputText.value;
+	const output = await generator(text);
+	const outputDiv = document.getElementById('output');
+	outputDiv.innerHTML = `&lt;p&gt;${output[0].generated_text}&lt;/p&gt;`;
+});
+</code></pre>
+<p>This part makes the app interactive. When the button is clicked, it reads the input text, runs the model, and shows the result.</p>
+<h2>What’s Happening Under the Hood?</h2>
+<p>The first time you load the page, your browser downloads the model weights and saves them. This might take a few seconds the first time, depending on your connection. Once the model is ready, all the processing happens locally in your browser. No requests go to any server while generating text, so your data stays private.</p>
+<h2>Why Use Transformers.js as a Python Developer?</h2>
+<p>Let's try to zoom out a little bit: Why do we train machine learning models? To be useful in solving a problem. If we look past the specific technologies or programming languages we are simply interested in integrating the models into systems in order for them to actually be used and hopefully deliver value to a user experience/process/etc.</p>
+<p>I personally think there are a lot of use cases that could benefit from abandoning the &quot;Python as the only tool&quot; mentality that we see in machine learning integration and adoption. We want to use the right tool for the job, right? If that tool is Transformers.js and Javascript because it clearly makes the most sense to have client-side inference then let's choose that tool instead of shoehorning Python into the mix.</p>
+<p>If you’re used to the Hugging Face Python library, Transformers.js can be an easy way to add AI features to web apps, quick demos, or share ideas with others. Some reasons you might want to try it:</p>
+<ul>
+<li><strong>Privacy</strong>: Everything stays on the user's device. No data is sent to external servers during inference, eliminating concerns about sensitive information being transmitted or stored elsewhere.</li>
+<li><strong>Simplicity</strong>: Deploy a working AI application with just plain HTML and JavaScript - no Python environment, package management or backend infrastructure needed.</li>
+<li><strong>Scalability</strong>: The computation happens on users' devices, distributing the workload across your user base rather than centralizing it on your servers.</li>
+<li><strong>Free deployment</strong>: Host your AI-powered web app anywhere that serves static files such as <a href="https://pages.github.com/">Github Pages</a>.</li>
+</ul>
+<h2>What Can You Do Next?</h2>
+<p>This is just a very basic starting point. It gets a little more complicated once you want more functionality as you have to use <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers">Web Workers</a> but would recommend just sticking to the <a href="https://huggingface.co/docs/transformers.js/">tutorials</a> in the documentation and reading those thoroughly. I can also just in general highly recommend checking out the <a href="https://huggingface.co/docs/transformers.js/index">Transformers.js documentation</a>, especially all of the <a href="https://huggingface.github.io/transformers.js/">demos</a> and <a href="https://github.com/huggingface/transformers.js-examples">examples</a> if you want to learn more.</p>
+<p>If you would like to follow the project I can also recommend following its core developer Xenova on <a href="https://github.com/xenova/">Github</a> or <a href="https://huggingface.co/Xenova/">HuggingFace</a>. He's often incredibly fast to implement demos of new features, models, etc. I really liked his <a href="https://www.youtube.com/watch?v=n18Lrbo8VU8">talk at WebAI Summit 2024</a> which gives an excellent overview over the Transformers.js project. This talk on the <a href="https://www.youtube.com/watch?v=tF70o1Q8VkM">State of client side machine learning</a> is also excellent.</p>
+<p>Feel free to connect with me on <a href="https://www.linkedin.com/in/rasgaard/">LinkedIn</a> and follow me on <a href="https://bsky.app/profile/rasgaard.com">Bluesky</a> and let's have a chat about what you're building with Transformers.js or any ideas you might have!</p>
+
+        </article>
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    
+    
+    <script>
+        // Theme toggle functionality
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+
+        // Add keyboard shortcut (Ctrl+T or Cmd+T)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+
+</html>

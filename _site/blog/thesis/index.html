@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Towards factual certainty in NLP using explainability methods</title>
+    <link rel="stylesheet" href="/styles.css">
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    
+</head>
+
+<body>
+    <nav class="site-nav">
+        <a href="/" class="site-name">Rasmus Aagaard</a>
+        <div class="nav-links">
+            <a href="/phd/status/">PhD</a>
+            <a href="/blog/">Blog</a>
+            <!--<a href="/favorites/">Favorites</a>-->
+        </div>
+    </nav>
+    <main>
+        <article>
+            <h1>Towards factual certainty in NLP using explainability methods</h1>
+<blockquote>
+<p>This post was written when I was using <a href="https://quarto.org/">Quarto</a> for the site and is now partly broken. I might revisit it some day and fix some of it but for now it's just a raw transfer.</p>
+</blockquote>
+<p>I recently completed my master's degree in Human-Centered AI from the Technical University of Denmark (DTU) and having handed in on July 16th and defending the thesis orally on August 1st 2023, I thought it might be a good exercise for myself to transfer to oral presentation into a &quot;textual representation&quot;, if you will.</p>
+<p>It is largely for my own sake but with a slight hope that someone out there will appreciate it at some point! I will try to stick to the outline that I used during the presentation in order to present it in the same way.</p>
+<p>Keep in mind that a lot of my work and details has been omitted from the presentation in the interest of time, as I had 30 minutes to present my 6 month endeavour. If this post sparks your curiosity, you can find the full report <a href="https://www.overleaf.com/read/vdyqtjdyvxmk">here</a> where it will hopefully be described in more detail.</p>
+<p>Anyway, hope you enjoy!</p>
+<h2>Motivation</h2>
+<h3>What is meant by <em>factual certainty?</em></h3>
+<p>In an episode of a Danish TV show called &quot;Kunstig Intelligens: Hvad er fake?&quot; or translated &quot;Artificial Intelligence: What is fake?&quot; we see the host, Tobias Hansen, asks ChatGPT to write an article about Tobias' greatest achievements in 300 words. ChatGPT then goes on to talk about how Tobias has been the host of <em>Aftenshowet,</em> has won awards, etc. which is simply not true.</p>
+<p><img src="../attachments/thesis/hallucination.png" alt="&quot;Kunstig intelligens: Hvad er fake?&quot;"></p>
+<p>This behaviour is commonly referred to as <em>hallucinations</em>, where the language model produces text that seems to be coherent but is not grounded in reality. This is a problem that is becoming increasingly relevant as we see more and more applications of language models potentially affecting people's lives.</p>
+<p>The reasons as to why these models hallucinate are many, but one is that they are lacking a sense of factual certainty. We see that datasets are becoming increasingly larger and reaching unfathomable sizes. Since the model's view of the world is restricted to the training data we must assume that some amount of misinformation is taught to the model, resulting in conflicting information.</p>
+<p><em>The question that we would like to deal with here is that of whether we can measure which data points are important for such hallucinations.</em></p>
+<p>As for now, ChatGPT and other chat-oriented applications of language models might make it seem like the impact of hallucinations can be neglected by the human user applying a bit of their common sense, however as these systems become increasingly integrated in more complex systems we might not be able to be as critical to the raw output of these models.</p>
+<h2>Background</h2>
+<h3>Deep Learning &amp; Language Modelling</h3>
+<p>As for background, I will assume that you are fairly familiar with the concept of deep learning and language modelling in order to keep this brief.</p>
+<p>What a language model does is essentially to learn the probability distribution of text sequences. It can express whether sentence A is more likely than sentence B. This idea can then be expanded and used for a number of different applications.</p>
+<p>With neural language models we learn the statistical structure of language in neural networks which is a collection of parameters that are tuned through optimizing a loss function on text data.</p>
+<p>These types of language models are special in that they can infer semantic relationships such as &quot;cat&quot; being closer in meaning to &quot;dog&quot; than it is to &quot;car&quot;. In more recent years, we have seen projects such as BERT where the model learns contextual representations via Masked Language Modelling (MLM).</p>
+<h3>T5 pre-trained language model</h3>
+<p>For this project specifically I used the T5 model from Google, which is an encoder-decoder transformer (like the one from Attention Is All you Need) where their novel idea is to reformulate every task into a text-to-text task.</p>
+<p>T5 is pre-trained on the C4 dataset which contains 750GB of filtered text, attempting to ensure a higher quality than previous large text datasets. The model employs a masked language modelling strategy they call span corruption where the input is randomly corrupted and the model learns to reconstruct the missing parts.</p>
+<p><img src="../attachments/thesis/t5_pretraining.png" alt="Illustration of T5's pre-training and fine-tuning stage"></p>
+<p>It can then further be fine-tuned for a number of tasks such as sentiment analysis, question answering, named-entity recognition, etc.</p>
+<h2>Training Data Attribution</h2>
+<p>Now, our original problem was that the training data might contain misinformation which would produce hallucinations. Given that we know that a model produces a hallucination $y_\text{test}$ from input $x_\text{test}$ we could imagine that we wanted to test how important a training sample $z=(x,y)$ is for $z_\text{test}$.</p>
+<p>Let's start off by training a model and find the optimal parameters though:</p>
+<p>$$
+\hat \theta = \arg \min_{\theta \in \Theta} \frac 1 n \sum_{i=1}^N \mathcal{L}(z_i, \theta)
+$$</p>
+<p>A possible way to measure how impactful $z$ is on $z_\text{test}$ is to simply remove $z$ and re-train the model, measuring the difference the loss on $z_\text{test}$ between the two models:</p>
+<p>$$
+\hat \theta_{-z} = \arg \min_{\theta \in \Theta} \frac 1 {n-1} \sum_{z_i\neq z} \mathcal{L}(z_i, \theta)
+$$</p>
+<p>$$
+\mathcal{I}(z, z_\text{test}) = \mathcal{L}(z_\text{test}, \hat \theta) - \mathcal{L}(z_\text{test}, \hat \theta _{-z})
+$$</p>
+<p>However, it is incredibly expensive to re-train the model for every $z$. The question is then if it is possible to approximate $\hat \theta _{-z}$.</p>
+<h4>Influence functions</h4>
+<p>Koh &amp; Liang (2017) introduces the idea of using influence functions, which is a concept that was introduced in the 80s with the field of &quot;robust statistics&quot;. This tool provides a way to approximate $\hat \theta_{-z}$ by placing a small $\epsilon$ in front of the loss-term for $z$ which allows us to observe how the loss evaluated on $z_{\text{test}}$ changes when $z$ is removed by setting $\epsilon = - \frac{1}{n}$:</p>
+<p>$$
+\hat \theta_{\epsilon, z} = \arg \min_{\theta \in \Theta} \frac{1}{n} \sum_{i=1}^n \mathcal{L}(z_i, \theta) + \epsilon \mathcal{L}(z, \theta)
+$$</p>
+<p>$$
+\mathcal{I}<em>{\text{up}, \text{loss}}(z, z</em>\text{test}) = - \nabla_\theta \mathcal{L}(z_\text{test}, \hat \theta)^\top \mathbf{H}<em>{\hat \theta}^{-1} \nabla</em>\theta \mathcal{L}(z, \hat \theta).
+$$</p>
+<p>There are, however, a few problems here. We notice the hessian in the middle of the two gradients, one for the test time sample and one for the training sample. For most modern models with millions, if not billions, of parameters it is largely intractable to compute this term. Another considerable problem is that this idea of influence functions was originally introduced to simpler methods where we are guaranteed an optimal solution. This is not the case with neural networks and therefore the method has shown a tendency to fall apart and produce unstable results.</p>
+<h4>TracIn (Pruthi et al., 2020)</h4>
+<p>Another team took this idea some years later and thought that they might offer a slightly different interpretation:</p>
+<p>$$
+\mathcal{I}(z, z_{\text{test}}) = \sum_{k=1}^K \nabla_\theta \mathcal{L} \left(z_{\text{test}}, \theta^{(k)}\right)^\top \nabla_{\theta} \mathcal{L} \left(z, \theta^{(k)}\right).
+$$</p>
+<p>Looking at both of the equations we see a similarity in that they are both using gradients to compute some sort of metric between the test and training sample. TracIn has seemingly removed the hessian component of the influence function. This leads to a simple dot-product between gradients, which can be interpreted as a similarity measure between the two gradients. In other words, we are interested in finding the training examples which affects the model as similarly as the test sample would have, had it been in the training set itself.</p>
+<p>The superscript, $(k)$, indicates the $k$th checkpoint. This is done in an attempt to capture the training dynamics of the network. For example, a training sample might be more influential earlier in during training due to the model not having seen samples that provide the same information.</p>
+<p>One thing we might be worried about with the TracIn equation above is that samples would get large influence scores simply due to having large gradients. We can remind ourselves that samples with large gradients are often samples that appear to be out of the distribution of their label, such as outliers or otherwise poor samples. What we can do is normalize the expression, resulting in a summed cosine similarity score:</p>
+<p>$$
+\mathcal{I}(z, z_{\text{test}}) = \sum_{k=1}^K \frac{\nabla_\theta \mathcal{L} \left(z_{\text{test}}, \theta^{(k)}\right)^\top \nabla_{\theta} \mathcal{L} \left(z, \theta^{(k)}\right)}{||\nabla_\theta \mathcal{L} \left(z_{\text{test}}, \theta^{(k)}\right)||~||\nabla_{\theta} \mathcal{L} \left(z, \theta^{(k)}\right)||}
+$$</p>
+<p>This is now an expression that attributes a larger score when a test and training sample simply affects the model's parameters in the same direction, as the magnitudes of the gradients are disregarded by normalization.</p>
+<p>I tried to do a simple example on MNIST to get a visual feel for how the two equations would attribute influence scores and to which training samples:</p>
+<p><img src="../attachments/thesis/test_image.png" alt="Randomly sampled test image"></p>
+<p><strong>Comparison of TracIn variants:</strong></p>
+<p><img src="../attachments/thesis/most_influential.png" alt="Top training samples ordered by their influence score obtained with the dot-product variant of TracIn"></p>
+<p><img src="../attachments/thesis/most_influential_normalized.png" alt="Top training samples ordered by their influence score obtained with the cosine similarity variant of TracIn"></p>
+<p>From these examples it is clear that the dot-product variant of TracIn attributes a high score to training samples that are outliers in some sense while the cosine similarity variant finds training samples that we can imagine conveys the same information as the test sample would have, had it been in the training set.</p>
+<h4>How can TDA be used in terms of factual certainty?</h4>
+<p>At this point you might be scratching your head a little bit to see how these methods can be plugged in, in an NLP context to help with making language models more factually certain. For this purpose we might imagine that there is a labelled relationship between training samples that express a certain fact and a test sample that makes the model recite that fact. This is exactly what the FTRACE-TREx (Akyürek, 2022) provides.</p>
+<h4>FTRACE-TREx</h4>
+<p>Below are some examples from FTRACE-TREx of training and test data where the training data is labelled as <strong>ground-truth proponents</strong> for the corresponding test sample. Ground-truth proponents are samples that should teach the model about the fact that is expressed in the test sample, in other words they should lower the loss of the test sample.</p>
+<table>
+<thead>
+<tr>
+<th>Training sample</th>
+<th>Test sample</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Input:</strong> “Situated in the heart of [MASK], Denmark, it is located on Kongens Nytorv opposite  Charlottenborg, the Royal Opera and Nyhavn.” <br> <strong>Target:</strong> “Copenhagen”</td>
+<td><strong>Input:</strong> “Charlottenborg Palace is located in [MASK]” <br> <strong>Target:</strong> “Copenhagen”</td>
+</tr>
+<tr>
+<td><strong>Input:</strong> “He later became a news anchor in Dagsrevyen, the main newscast of the Norwegian Broadcasting Corporation, at that time the only television channel in [MASK]” <br> <strong>Target:</strong> “Norway”</td>
+<td><strong>Input:</strong> “Dagsrevyen was created in [MASK]” <br> <strong>Target:</strong> “Norway”</td>
+</tr>
+<tr>
+<td><strong>Input:</strong> “Melnik Peak (Vrah Melnik ’vr&amp;h ’mel-nik) is the 696 m summit of Melnik Ridge in eastern [MASK], South Shetland Islands in Antarctica.” <br> <strong>Target:</strong> “Livingston Island”</td>
+<td><strong>Input:</strong> “Melnik Ridge is located in [MASK]” <br> <strong>Target:</strong> “Antarctica”</td>
+</tr>
+<tr>
+<td>There are roughly 1.5m training examples which are referred to as <em>abstracts</em>. They can be thought of as small paragraphs from Wikipedia where the masking for MLM is controlled in such a way that either an object or a subject of a fact is masked out.</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The test set consists of 31.5k facts referred to as <em>queries</em> as we can think of the test-time predictions as a way of testing whether the model has retained facts from the training data. These are systematically built from fact-triplets (subject, relation, object) - e.g. (”Charlottenborg Palace”, “is located in”, “Copenhagen”) - where there are a total of 41 relation predicates that are used throughout the test set. Each query has an average of 83 proponents in the training data.</p>
+<p>For computational reasons, since doing back-prop for each of the 1.5m abstracts for each query is expensive, we construct a <em><strong>candidate set</strong></em> for a given query which consists of</p>
+<ul>
+<li>
+<p>Top 100 abstracts retrievals from BM25,</p>
+</li>
+<li>
+<p>100 abstracts which shares their target with the query,</p>
+</li>
+<li>
+<p>100 random abstracts to act as distractions,</p>
+</li>
+<li>
+<p>and finally all proponents for the query.</p>
+</li>
+</ul>
+<p>This set should consist of all relevant abstracts for a query as well as some distractors to set a baseline of the influence scores to come.</p>
+<h2>Results from experiments</h2>
+<p>For the first part, I simply followed the process laid out by existing research, in particular (Akyürek, 2022), which consisted of the following,</p>
+<ol>
+<li>
+<p>Train a model on FTRACE-TREx and save checkpoints throughout training</p>
+</li>
+<li>
+<p>Define “Novel Facts”, which are queries that are incorrectly predicted before training on FTRACE-TREx but correct after, and randomly select a 1000 of those for analysis</p>
+</li>
+<li>
+<p>Compute influence scores for each checkpoint on the randomly selected novel facts.</p>
+</li>
+</ol>
+<h3>TracIn influence scores</h3>
+<p>This process resulted in the plots seen here,</p>
+<p><img src="../attachments/thesis/influence.png" alt="Mean TracIn influence score for each of the abstract types in the candidate set as well as grouped by checkpoints."></p>
+<p>Mean TracIn influence score for each of the abstract types in the candidate set as well as grouped by checkpoints.</p>
+<p><img src="../attachments/thesis/influence_boxen.png" alt="Summed TracIn influence for each of the abstract types in the candidate set."></p>
+<p>Summed TracIn influence for each of the abstract types in the candidate set.</p>
+<p>We can immediately see that the <code>Random</code> abstracts gets a very low influence score which is to be expected. What is not obvious however is that the <code>Proponents</code> are on average attributed a relatively low influence score. The <code>Same targets</code> is seemingly attributed a consistent high influence score.</p>
+<h3>Target sensitivity</h3>
+<p>One thing that is striking about these results is that there is apparently a fair amount of proponents which gets scored so negatively that they would be categorised as <em>opponents</em> rather than proponents, i.e. the score suggests that the training example increases the loss of the test sample. This did not make a lot of sense to me, so I went ahead and looked at which training examples get such negative scores and compared them to their corresponding query.</p>
+<p>A pattern emerged from this as I found that slight variations in the target would essentially flip the score completely. For example, the query “Amsterdam is the capital of [Netherlands]”, where “Netherlands” is masked out, has the abstract “Gone Bald is a noise rock band from Amsterdam, [The Netherlands]” as its proponent, yet is attributed an influence score of -1.94. If we change either target to match the other’s the score is flipped to a high score of 1.96. Other examples of this behaviour includes “Apple”/”Apple Computer”, “Amazon”/”Amazon.com”, “London”/”London, England”, “Mumbai”/”Greater Mumbai”, etc.</p>
+<p>This had me wondering: How far does this go? What other seemingly inconsequential changes can I make for the gradients to be vastly different? So taking a sentence “Copenhagen is the capital of [Denmark]” and “Copenhagen is the capital of [Denmark.]” - i.e. just adding a single “.” to the target, resulted in a cosine similarity of 0.32 whereas without the “.” they would of course be perfectly similar and get a score of 1.</p>
+<p>All of this suggests that the gradients that are produced by the T5 model is highly sensitive to the target value, which also explains the high scores in the <code>Same target</code> abstract type.</p>
+<h3>FTRACE-TREx inspection</h3>
+<p>I wanted to dig further into FTRACE-TREx since I had noticed some potential issues while working with the dataset.</p>
+<p>In the paper that introduces the dataset it is mentioned that the average size of the proponent sets for the queries is 83. While this is true it is also somewhat misleading as the median of the proponents set is 7, indicating that there are large outliers pushing that mean value. We observe that some queries have associated proponent sets in the tens of thousands while others have much fewer. This obviously affects the training process as some test samples have far more training data. This also hurts accessibility and reproducibility as processing one of those queries' proponent sets is expensive and time-consuming, compared to having not randomly sampled them.</p>
+<p><img src="../attachments/thesis/proponent_lengths.png" alt="The size of the proponent sets for all queries vary vastly due to large outliers. This introduces processing issues."></p>
+<p>Another notable aspect of the test set is that each query is glued together with a predicate, such as “[X] is the capital of [Y]”. What we see here is that some predicates has a much larger average number of associated proponents, simply increasing the training data for a given type of predicate. Related research (Park et al., 2023) has suggested that something like this could lead to the model learning behaviour rather than the facts themselves, such as learning relationships of capital cities not because it was presented with the facts, but because of the country-capital relationships.</p>
+<p><img src="../attachments/thesis/predicate_proponents.png" alt="Only few predicates have a large number of associated proponents in the training set. This would presumably lead to those predicates being learned at a greater rate."></p>
+<h3>Robustness of leave-one-out error</h3>
+<p>Throughout the project I had read through research that is related to Koh and Liangs influence functions paper as well as TracIn. One particular finding from (Søgaard et al., 2021) was that the metric that we are trying to estimate - the leave-one-out error - is not itself a robust metric. Due to a number of stochastic factors involved with training deep neural networks it can not be expected that removing a single training point affects the network the same way every time. So essentially, these methods have been chasing after something that itself is not robust.</p>
+<p>This then begs the question, which (Bae et al., 2022) has as the title for their paper, <strong>“If Influence Functions are the Answer, Then What is the Question?”.</strong></p>
+<p>One suggestion by Søgaard et al. is that we can evaluate TDA methods not in their ability to estimate LOO error, but rather finding poisoned training data. In the context of this project we might imagine that we can inject misinformation by systematically changing the targets of certain training samples in order to poison the training set.</p>
+<h3>Misinformation surfacing</h3>
+<p>This brings us back to the original conundrum: Since a contributing factor to language model hallucinations is conflicting facts in the training data, can we find misinformation in order to remove it, thus making the model more factually certain?</p>
+<p>To evaluate this, I constructed a pipeline that would systematically poison the training data with alternate yet semantically valid targets which is illustrated below,</p>
+<p><img src="../attachments/thesis/misinformation_diagram.png" alt="Process diagram showing how training data is sampled and poisoned"></p>
+<p>Running TracIn on the poisoned training data results in the scores seen below. We notice that the distributions between the poisoned and un-poisoned are remarkably different, allowing for distinguishing between misinformation and actual facts.</p>
+<p><img src="../attachments/thesis/influence_poisoned.png" alt="Influence scores from the poisoned training data."></p>
+<h2>Conclusion</h2>
+<p>To circle back to the TV show that was shown in the beginning of the post, they later took a question from a viewer who asked “If AI gets its information from the internet, is it possible for it to distinguish fake news, conspiracy theories and truth? - Poul”</p>
+<p><img src="../attachments/thesis/poul_conclusion.png" alt="Viewer question on the TV show that was also shown in the Motivation section"></p>
+<p>To which I will now answer: Well, kind of…</p>
+<p>We can use these TDA methods to find training data that affects the model similarly as a given test example would have, had it been in the training data. There are, however, some immediate limitations that should be addressed.</p>
+<p>The computational challenge of using gradient similarity as a way to measure TDA can not be ignored. It is very expensive, and oftentimes completely infeasible, to compute the gradient for each of the training examples. There could be some heuristics to create a candidate set similarly as we had done in this project, but I would suspect that there is not “one size fits all” solution for that as it would depend on the problem at hand.</p>
+<p>Furthermore, we saw that TracIn, and its reliance on gradient similarity, seemingly lacked robustness in some sense. Minor changes to the samples would cause the gradients to become very dissimilar. Research in explainability suggests that the non-smoothness of some of the used non-linearities in the network's activation functions might not be suitable when it comes to comparing gradients in this fashion (Dombrowski et al., 2019). This would be an obvious next step to test in future iterations of the project.</p>
+<p><img src="../attachments/thesis/smooth_network.png" alt="Network with smooth activation functions vs. ReLU"></p>
+<p>Overall, I am fairly happy about my thesis as a whole. I can sum up my contributions to the area as being:</p>
+<ul>
+<li>
+<p>Suggest an increase in focus on robustness of TDA methods</p>
+</li>
+<li>
+<p>Show that existing TDA benchmarking datasets exhibit issues related to accessibility and reproducibility</p>
+</li>
+<li>
+<p>Explore potential for practical use-cases for handling misinformation in datasets by providing a pipeline for poisoning training data</p>
+</li>
+</ul>
+
+        </article>
+    </main>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMath()"></script>
+    <script>
+        function renderMath() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\[', right: '\\]', display: true },
+                    { left: '\\(', right: '\\)', display: false }
+                ],
+                throwOnError: false
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderMath);
+        } else {
+            renderMath();
+        }
+    </script>
+    
+    <script>
+        // Theme toggle functionality
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+
+        // Add keyboard shortcut (Ctrl+T or Cmd+T)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+
+</html>

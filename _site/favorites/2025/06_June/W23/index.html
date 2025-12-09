@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamifying Annotations, Digital Sovereignty, AI Engineer Fair, and Open Source Contributions</title>
+    <link rel="stylesheet" href="/styles.css">
+    
+    
+</head>
+
+<body>
+    <nav class="site-nav">
+        <a href="/" class="site-name">Rasmus Aagaard</a>
+        <div class="nav-links">
+            <a href="/phd/status/">PhD</a>
+            <a href="/blog/">Blog</a>
+            <!--<a href="/favorites/">Favorites</a>-->
+        </div>
+    </nav>
+    <main>
+        <article>
+            <h4>Gamepad support for Python is here!</h4>
+<blockquote>
+<p><a href="https://www.youtube.com/watch?v=4fXLB5_F2rg">https://www.youtube.com/watch?v=4fXLB5_F2rg</a></p>
+</blockquote>
+<p>It's rare to find something that is universally agreed upon. Everyone agrees that data annotation is an important part of the AI system pipeline but the thing is that nobody actually wants to do the annotations. It's often associated with tedious, manual, monotonous work that's just a chore to get done so you can proceed to more exciting things. That's why it's so important to do everything you can do to make annotating as frictionless as possible.</p>
+<p>I don't believe that annotating data is all that bad. When I participated as the Danish language lead for the <a href="https://huggingface.co/posts/davanstrien/616684712874803">FineWeb-C </a> multilingual dataset I decided to give it a go myself. The project used <a href="https://argilla.io/">Argilla</a> as the data annotation platform. It was really simple, intuitive and - once you got going - very fast to use. I ended up annotating 1,000 texts on their educational content just by loading it up on my iPad and doing a bit here and there.</p>
+<p>In this video, <a href="https://koaning.io/">Vincent Warmerdam</a> shows that you can use an 8BitDo gamepad and build a simple interface in Marimo to provide a fun and interactive annotation experience. I like the way he's thinking!</p>
+<h4>Både Københavns og Aarhus Kommune vil droppe Microsoft</h4>
+<blockquote>
+<p><a href="https://www.dr.dk/nyheder/seneste/baade-koebenhavns-og-aarhus-kommune-vil-droppe-microsoft">https://www.dr.dk/nyheder/seneste/baade-koebenhavns-og-aarhus-kommune-vil-droppe-microsoft</a></p>
+</blockquote>
+<p>Digital sovereignty is a very hot topic in Denmark at the moment. Primarily due to the geopolitical instabilities that the current US administration imposes. I have heard people say that &quot;Denmark is a Microsoft country&quot; so much over the past few years. It always nagged me. Analogous to how Steven Balmer in the early 2000s said that <a href="https://en.wikipedia.org/wiki/Steve_Ballmer#Free_and_open_source_software">Linux is a cancer</a> I believe that companies whose primary job is to spread Microsoft products and services is largely cancerous to Danish society and threatens our sovereignty. Our politicians often brag about Denmark's level of digitisation - but at what cost? We currently don't own our (critical) infrastructure.</p>
+<p>It is uplifting to see media like <a href="https://ing.dk">Ingeniøren</a> covering stories about how the US is forcing Microsoft to block email access for <a href="https://www.version2.dk/artikel/microsoft-i-stormvejr-efter-mail-blokering-her-er-den-hemmelige-forklaring-til-kunderne">Chief Prosecutor of the ICC</a> and promoting how the French are using <a href="https://ing.dk/artikel/frankrig-er-europamestre-i-digital-suveraenitet-saadan-udbreder-de-open-source-i-staten">open source software in their government</a>.</p>
+<p>I could go on and on about this. I'll probably have another issue with links to some Netcompany-bashing very soon.</p>
+<p>One thing I would like to mention is that I'm so grateful that <a href="https://www.linkedin.com/posts/david-heinemeier-hansson-374b18221_denmark-gets-more-serious-about-digital-sovereignty-activity-7335578599741149184-u-hv">David Heinemeier Hansson</a> is using his voice and authority to set the record straight on this topic. His expertise and viewpoints are so valuable for the debate. I think we would be overwhelmed with wolves in the discussion of how to secure the chickens, to borrow his analogy, had it not been for his contributions.</p>
+<h4>AI Engineer World's Fair</h4>
+<blockquote>
+<p><a href="https://www.youtube.com/@aiDotEngineer/streams">https://www.youtube.com/@aiDotEngineer/streams</a></p>
+</blockquote>
+<p>When I first heard the role &quot;AI Engineer&quot; I quickly brushed it off as being a silly attempt at iterating on ML Engineer, Data Scientist etc. that I didn't think would catch on. Having worked with AI professionally for about a year now I see very clearly that I was wrong. The role encapsulates very that organisations don't necessarily need someone to train models or do elaborate data experiments, but rather someone that can integrate AI into systems through engineering practices.</p>
+<p><a href="https://www.swyx.io/">Swyx</a> is doing a lot in the AI Engineering space. I enjoy his <a href="https://news.smol.ai/">AI News newsletter</a>  as well as the <a href="https://www.latent.space/">latent.space podcast</a>.</p>
+<p>I'll be looking forward to browsing through the catalog of talks once the fair is over.</p>
+<h4>Good and Easy Way to Contribute to Open Source</h4>
+<blockquote>
+<p><a href="https://bsky.app/profile/simonwillison.net/post/3lqo2fzc5yk2i">https://bsky.app/profile/simonwillison.net/post/3lqo2fzc5yk2i</a></p>
+</blockquote>
+<p>The <a href="https://ddsc.io/">Danish Data Science Community</a> recently put together two committees: One for Open Source initiatives and one for Events - and I'm part of the Open Source committee!</p>
+<p>It has made me think about how Open Source work is on a spectrum and how there exists high-impact opportunities everywhere on that spectrum. As exemplified by <a href="https://simonwillison.net/">Simon Willison</a> who points out in a post on Bluesky that simply writing up a <a href="https://anthonylewis.com/2025/06/01/run-your-own-ai/">small tutorial post</a> about usage of an open source project is greatly beneficial.
+A post like that makes for discoverability and breaking down barriers for engaging with the project. I find it really encouraging to know that contributions like that are appreciated.</p>
+
+        </article>
+    </main>
+    
+    
+    <script>
+        // Theme toggle functionality
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+
+        // Add keyboard shortcut (Ctrl+T or Cmd+T)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+
+</html>

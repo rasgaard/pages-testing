@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Use-case for Prompting Whisper in Transformers.js</title>
+    <link rel="stylesheet" href="/styles.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+    
+</head>
+
+<body>
+    <nav class="site-nav">
+        <a href="/" class="site-name">Rasmus Aagaard</a>
+        <div class="nav-links">
+            <a href="/phd/status/">PhD</a>
+            <a href="/blog/">Blog</a>
+            <!--<a href="/favorites/">Favorites</a>-->
+        </div>
+    </nav>
+    <main>
+        <article>
+            <h1>Use-case for Prompting Whisper in Transformers.js</h1>
+<p>At Laerdal we are always trying to maximize learning outcome of our products by providing an experience that closely resembles a real medical emergency situation. One way to improve the learning outcome is to use voice recognition as an interface to our products. Often the user is instructed to say something in a stage of the learning experience. This could be &quot;Get an AED&quot; or &quot;Check for breathing&quot;. We need to be sure that the user actually says the correct phrase in order to proceed.</p>
+<p>Transcription quality varies a lot between services. A particular problem is that the user might say the right thing but the transcription is incorrect, resulting in a poor user experience. This was very often the case in jargon such as &quot;AED&quot; which the transcription service would often hear as &quot;80&quot;, &quot;AD&quot;, etc.</p>
+<p>I found out that it is possible to <a href="https://cookbook.openai.com/examples/whisper_prompting_guide">prompt Whisper</a> in order to guide the text generation. This could be particularly useful in our case where we knew that the audio should contain a particular phrase or word.</p>
+<p>This was very easy to try out and validate using the <a href="https://github.com/huggingface/transformers/">Transformers library</a> due to the <code>.generate</code> method that allows for passing in a prompt as shown here:</p>
+<pre><code class="language-python">from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
+
+processor = AutoProcessor.from_pretrained(&quot;openai/whisper-tiny.en&quot;)
+whisper = AutoModelForSpeechSeq2Seq.from_pretrained(&quot;openai/whisper-tiny.en&quot;)
+
+  
+
+prompt = torch.tensor(processor.get_prompt_ids(&quot;get an AED&quot;))
+audio_input = ... # audio file to be transcribed
+
+input_features = processor(
+	audio_input, sampling_rate=16_000, return_tensors=&quot;pt&quot;
+).input_features
+
+predicted_ids = whisper.generate(input_features, prompt_ids=prompt)
+processor.batch_decode(
+	predicted_ids,
+	skip_special_tokens=True,
+)
+</code></pre>
+<p>The twist is that we would like to use this in an application that uses Javascript as the backend. I have previously experimented with <a href="https://huggingface.co/docs/transformers.js/">transformers.js</a> but never had a reason to dig very deep.</p>
+<p>As I have very limited experience using Javascript it was really nice to find that there are good <a href="https://github.com/xenova/whisper-web">examples</a> of using Whisper with transformers.js. However, I quickly realized that there was no support for prompting Whisper as with the Python library.</p>
+<p>In order to make this work I had to dig deeper into the transformers library to find out how the prompt was actually implemented. I found that the prompt was actually just a list of token ids using the special <code>&lt;|startofprev|&gt;</code>-token. This was pretty easy to implement in Javascript as well and could be passed as the <code>decoder_input_ids</code> as they are <a href="https://github.com/huggingface/transformers/issues/28228">practically the same</a> as the <code>prompt_ids</code>.</p>
+<pre><code class="language-javascript">
+import { AutoProcessor, AutoTokenizer, WhisperForConditionalGeneration } from &quot;@huggingface/transformers&quot;;
+import { readFileSync } from 'fs';
+import * as wav from 'node-wav';
+
+  
+
+const model = await WhisperForConditionalGeneration.from_pretrained(&quot;onnx-community/whisper-tiny.en&quot;, {
+	dtype: {
+		encoder_model: 'fp16',
+		decoder_model_merged: 'q4',
+	}
+});
+
+  
+
+const tokenizer = await AutoTokenizer.from_pretrained(&quot;onnx-community/whisper-tiny.en&quot;);
+const processor = await AutoProcessor.from_pretrained(&quot;onnx-community/whisper-tiny.en&quot;);
+
+const decoded_audio = ... // audio file to be transcribed
+
+const input = await processor(decoded_audio.channelData[0]);
+
+let prompt_str = &quot;&lt;|startofprev|&gt; get an AED&quot;
+let prompt_ids = tokenizer.encode(prompt_str, { add_special_tokens: false });
+
+const output = await model.generate({ inputs: input.input_features, decoder_input_ids: [prompt_ids] });
+
+const decodedOutput = tokenizer.decode(output[0], { skip_special_tokens: true });
+
+const output_str = decodedOutput.slice(prompt_str.length - &quot;&lt;|startofprev|&gt;&quot;.length);
+</code></pre>
+<p>These two snippets achieve exactly the same thing but some tweaking had to be done in the case of transformers.js as it isn't as feature complete as the Python library. This was a really cool learning experience that helped me understand the underlying mechanics of what the tokens actually do and how they can be used for Whisper transcription.</p>
+
+        </article>
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    
+    
+    <script>
+        // Theme toggle functionality
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+
+        // Add keyboard shortcut (Ctrl+T or Cmd+T)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+
+</html>

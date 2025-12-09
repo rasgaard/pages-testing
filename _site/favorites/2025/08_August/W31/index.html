@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Rambling, AI Edge Deployment and NLP Conference</title>
+    <link rel="stylesheet" href="/styles.css">
+    
+    
+</head>
+
+<body>
+    <nav class="site-nav">
+        <a href="/" class="site-name">Rasmus Aagaard</a>
+        <div class="nav-links">
+            <a href="/phd/status/">PhD</a>
+            <a href="/blog/">Blog</a>
+            <!--<a href="/favorites/">Favorites</a>-->
+        </div>
+    </nav>
+    <main>
+        <article>
+            <h4>If you're remote, ramble</h4>
+<blockquote>
+<p>https://stephango.com/ramblings</p>
+</blockquote>
+<p>Working in teams where communication is oftentimes primarily done through group channels or scheduled calls can be hard. Having started my professional career after Covid and the boom of remote work I can't speak to how different it is compared to before but I can only imagine. I love the associated flexibility but it challenges communication and a sense of belonging that's hard to achieve.</p>
+<p>I really like the idea presented in the blog post. Having personal &quot;rambling&quot; channels for each person on a team and treating it like a micro social media feed resonates with me. You absolutely need a place where you can share ideas, make water cooler chats, blurt out random nonsense and share pictures from your vacation. All of that creates a sense of a person behind the screen. Much more so than a few (often performative) scheduled meetings.</p>
+<p>I'm not sure if I will recommend this exact solution to my team. Perhaps just a &quot;Random&quot; channel will be sufficient for now. Either way, I have come to realize that sharing thoughts is collaborating on ideas is highly important. Remote/hybrid work makes this communication harder but there are simple ways around it.</p>
+<h4>ExecuTorch</h4>
+<blockquote>
+<p><a href="https://engineering.fb.com/2025/07/28/android/executorch-on-device-ml-meta-family-of-apps/">https://engineering.fb.com/2025/07/28/android/executorch-on-device-ml-meta-family-of-apps/</a></p>
+</blockquote>
+<p>By now I have mentioned my upcoming PhD quite a lot. It at least feels like it. This is another entry on that theme. The article linked popped up on my LinkedIn feed and it is exactly what I have been looking for. A framework for putting AI on edge devices. What excites me about ExecuTorch is that it is in active development and going by their blog post it seems like they are investing in actually using it for production use-cases at Meta.</p>
+<p>Possibly even more exciting is that after joining the ExecuTorch Discord server and introducing myself, a manager from the team replied and mentioned that they do research partnerships. The prospect of doing a research project with Meta engineers is highly motivating to me and I hope it'll come to fruition.</p>
+<h4>Pre-ACL Workshop</h4>
+<blockquote>
+<p><a href="https://www.aicentre.dk/events/pre-acl-2025-workshop">https://www.aicentre.dk/events/pre-acl-2025-workshop</a></p>
+</blockquote>
+<p>Going to events, conferences and meetups is usually a lot of fun. This time was no different. A group of NLP researchers Copenhagen University had put together an amazing programme of talks at the Pioneer Centre for AI, located in the Botanical Gardens in Copenhagen. Although I don't have a huge reason to attend talks about bias and social reasoning, which were prominent topics, I did have a really good time. Thanks to the organizers for putting it together.</p>
+
+        </article>
+    </main>
+    
+    
+    <script>
+        // Theme toggle functionality
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+
+        // Add keyboard shortcut (Ctrl+T or Cmd+T)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appreciation for Academia and Idea Propagation in Organizations</title>
+    <link rel="stylesheet" href="/styles.css">
+    
+    
+</head>
+
+<body>
+    <nav class="site-nav">
+        <a href="/" class="site-name">Rasmus Aagaard</a>
+        <div class="nav-links">
+            <a href="/phd/status/">PhD</a>
+            <a href="/blog/">Blog</a>
+            <!--<a href="/favorites/">Favorites</a>-->
+        </div>
+    </nav>
+    <main>
+        <article>
+            <h4>Copenhagen NLP Symposium</h4>
+<blockquote>
+<p><a href="https://cphnlp.github.io/">https://cphnlp.github.io/</a></p>
+</blockquote>
+<p>I really enjoy academic conferences and meetups. There's just an overwhelmingly positive attitude that's hard to replicate elsewhere. People are genuinely interested in you and what you have going on. No one is there to sell you a service or promote their latest developer tool. People are there to exchange ideas.</p>
+<p>That's why I was really excited when the Danish ML/AI academics I follow on Bluesky started promoting a symposium on NLP in Copenhagen. There were speakers from places whose work I deeply respect such as HuggingFace, Cohere and the Allen Institute. I quickly registered my interest and blocked my work calendar.</p>
+<p>My takeaways from the talks were,</p>
+<ul>
+<li>Evaluation of LLMs continues to be a hard problem</li>
+<li>Small language models are increasingly competitive</li>
+<li>High-quality data is hard to obtain and use at scale
+I sort of get the feeling that this is what I expected and wanted to hear and that my excitement comes from being confirmed by industry and academic experts.</li>
+</ul>
+<p>My favourite moment from the talks was by <a href="https://kyleclo.com/">Kyle Ro</a>. He shared some peculiar spikes in the loss during model training. It turned out that at least one of the spikes was caused by data from the <a href="https://www.reddit.com/r/microwavegang/">microwavegang subreddit</a> where they posts consists of &quot;Mmmmmmmmmmmm&quot; which resulted in a high loss. It was nice to hear about his pragmatic approach of just looking at the data and fixing it with a simple filter.</p>
+<h4>Andrej Karpathy: Software Is Changing (Again)</h4>
+<blockquote>
+<p><a href="https://youtu.be/LCEmiRjPEtQ">https://youtu.be/LCEmiRjPEtQ</a></p>
+</blockquote>
+<p>My appreciation for Andrej Karpathy's teaching started while I did my master's thesis. His <a href="https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ">Neural Networks: Zero to Hero</a> series really helped me get an intuitive understanding of some fundamental concepts in deep learning.</p>
+<p>What excites me a lot about Karpathy is that his name has gotten associated with quality to the point that the directors and senior managers at my company is listening to him. With so many high-noise inputs, especially at that layer, it's really nice to see that Andrej's work is cutting through the noise.</p>
+<p>Our Director of XR Products had this to say about the presentation:
+<em>&quot;There were lots of good points in this talk. The one that struck out to me, was this mental model of how software development is shifting to what he calls Software 3.0: A software development model where neural networks (typically deep learning models) are trained on large datasets to learn patterns, decision logic, and behavior—rather than being explicitly programmed line-by-line by developers. So it basically allowed Tesla's automated self-driving software to learn much faster from data sets, than what could be constructed by Software 1.0 hard-coded logic (C, Java, Python, etc.) and Software 2.0 (machine learning methods with decision trees).</em></p>
+<p><em>AND - That while Software 3.0 is expanding, as in the picture below, to ensure that we can control and shape what we want the software and application to do, he is stating that <strong>we actually need a blend of Software 1.0, 2.0 and 3.0</strong> potentially all working together to produce the right result. I think that mental model of the combination of the three, working in concert, was important for me to remember.&quot;</em></p>
+<p>Propagating ideas and mental models through an organization can be difficult. Having resources such as talks like this by Andrej will make it easier to have a shared vocabulary about some pretty abstract ideas.</p>
+
+        </article>
+    </main>
+    
+    
+    <script>
+        // Theme toggle functionality
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+
+        // Add keyboard shortcut (Ctrl+T or Cmd+T)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+
+</html>
