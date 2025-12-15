@@ -1,0 +1,15 @@
+# Site settings
+title: Rasmus Aagaard
+description: Industrial PhD student researching model compression and on-device AI deployment
+
+# Build settings
+markdown: kramdown
+
+# Collections
+collections:
+  phd_status:
+    output: true
+    permalink: /phd/status/:name/
+  blog:
+    output: true
+    permalink: /blog/:name/

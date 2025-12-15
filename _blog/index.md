@@ -1,0 +1,5 @@
+# Blog posts
+
+{% for post in collections.posts %}
+- <a href="{{ post.url }}">{{ post.data.title }}</a>
+{%- endfor %}
