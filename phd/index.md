@@ -3,7 +3,7 @@ layout: default
 title: PhD Status
 ---
 ## Status Updates
-Once a month I try to sit down and think about what have happened.
+Once a month I try to sit down and think about what has happened.
 
 {% assign posts = site.phd_status | sort: 'date' | reverse %}
 {% for status in posts %}
@@ -14,5 +14,5 @@ It is titled *"Edge deployment of deep neural networks via Model Compression for
 
 Here are a few key statements that motivates me about the project: 
 - We'd like to see how much performance we can squeeze onto devices with limited compute.
-- Huge amounts of resources have already one into training models. Let's make sure that they're put to use by making them even smaller such that they're applicable on more devices.
+- Huge amounts of resources have already one into training models. Let's make sure that they're put to use by making them applicable on a wide range of devices.
 - Centralizing AI inference is the standard but it's not always clear winner. *Distributing* inference compute to the client-side can be hugely beneficial, perhaps even necessary, due to privacy, latency or cost at scale.
